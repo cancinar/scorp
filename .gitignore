@@ -1,2 +1,5 @@
 /node_modules
 /package-lock.json
+.idea
+.idea*
+Scorp SampleProject_Feb16.iml

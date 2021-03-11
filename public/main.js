@@ -9,7 +9,7 @@ import {
 } from "./dom_updates.js";
 
 const api = new APIWrapper();
-let interval;
+let interval = 0;
 class EventQueue {
   queue;
   processingEvent;
@@ -40,12 +40,15 @@ class EventQueue {
   }
 
   getFirst() {
-    return this.queue[0];
+    return this.queue[0] === "undefined" ? {} : this.queue[0];
   }
 
   consume() {
-    this.processingEvent = this.queue[0];
-    return this.queue.shift();
+    if (this.queue.length > 0) {
+      this.processingEvent = this.getFirst();
+      return this.queue.shift();
+    }
+    return {};
   }
 }
 
@@ -55,15 +58,23 @@ function replay() {
   if (typeof queue.getFirst() === "undefined") {
     return;
   }
+
+  let event =  queue.consume();
   document.getElementById(
     "animatedGift"
-  ).innerHTML = queue.consume().data.gift_emoji;
-  document.getElementById("messages").innerHTML = queue.consume().data.message;
+  ).innerHTML = event.data.gift_emoji;
+  document.getElementById("messages").innerHTML = event.data.username + ' '+ event.data.message;
+
 }
 
 function init() {
   setInterval(() => {
     if (queue.processingEvent.type === "ag") {
+      interval += 500;
+      if (interval >= 2000) {
+        interval = 0;
+        replay();
+      }
       return;
     }
 
